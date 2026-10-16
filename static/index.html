@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kohli Centuries Explorer</title>
+<style>
+:root{--bg:#F6F7F9;--card:#fff;--ink:#1F2937;--mute:#6B7280;--line:#E5E7EB;--won:#3B6FD4;--lost:#D9645B;--draw:#B8BEC9;--gold:#C98A00}
+@media (prefers-color-scheme:dark){:root{--bg:#14171C;--card:#1C2027;--ink:#E8EAEE;--mute:#9AA2AF;--line:#2C323C;--won:#6E9BEF;--lost:#E8837B;--draw:#5B6472;--gold:#F6B93B}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+:focus-visible{outline:2px solid var(--won);outline-offset:2px}
+main{max-width:1080px;margin:0 auto;padding:28px 18px 40px}
+h1{font-size:26px;font-weight:600;margin:0 0 4px}
+h2{font-size:15px;font-weight:600;margin:0 0 12px}
+.sub{color:var(--mute);margin:0 0 20px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab[aria-pressed="true"]{border-color:var(--won);box-shadow:inset 0 0 0 1px var(--won);font-weight:600}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+select,button{font:inherit;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+button{cursor:pointer}
+select.on{border-color:var(--won)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.stat b{display:block;font-size:24px;font-weight:600}
+.stat small{color:var(--mute);font-size:13px}
+.insight{color:var(--mute);margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;margin-bottom:12px}
+.strip{height:172px;display:flex;align-items:flex-end;gap:2px}
+.sc{flex:1;max-width:22px;min-width:3px;height:100%;display:flex;flex-direction:column;justify-content:flex-end}
+.bar{width:100%;height:calc((100% - 22px) * var(--k));border:0;padding:0;border-radius:2px 2px 0 0}
+.sy{height:22px;padding-top:6px;font-size:11px;color:var(--mute);white-space:nowrap;position:relative}
+.sy.t::before{content:"";position:absolute;left:0;top:0;height:4px;border-left:1px solid var(--mute)}
+.w{background:var(--won)}.l{background:var(--lost)}.d{background:var(--draw)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--mute);margin-top:10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+.years{display:flex;gap:3px;height:170px}
+.ycol{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0}
+.yv{font-size:11px;color:var(--mute);height:15px}
+.yb{flex:1;display:flex;align-items:flex-end;width:100%}
+.yb i{display:block;width:100%;background:var(--won);border-radius:2px 2px 0 0}
+.yl{font-size:11px;color:var(--mute);height:16px;padding-top:3px}
+ul{list-style:none;margin:0;padding:0}
+.row{display:grid;grid-template-columns:96px 1fr 28px;align-items:center;gap:10px;padding:5px 0;font-size:14px}
+.track{height:12px;display:flex;border-radius:3px;overflow:hidden}
+.track.full{background:var(--line)}
+.track i{display:block}
+.num{text-align:right;font-weight:600}
+.sub{display:block;color:var(--mute);font-size:12px;line-height:1.3}
+#opps .row{grid-template-columns:150px 1fr 28px}
+#opps.compact .sub{margin:0}
+.scroll{max-height:380px;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{position:sticky;top:0;background:var(--card);text-align:left;font-weight:500;color:var(--mute);padding:8px 12px 8px 0;border-bottom:1px solid var(--line)}
+td{padding:8px 12px 8px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px}
+.empty{color:var(--mute);font-size:14px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{border:1px solid var(--line);border-radius:10px;padding:10px 6px;text-align:center}
+.tile small{display:block;font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;line-height:1.3}
+.tile b{display:block;font-size:30px;font-weight:700;color:var(--gold);line-height:1.3}
+.tnote{color:var(--mute);font-size:12px;margin:10px 0 0}
+#ground-wrap{display:contents}
+#ground-wrap.ipl{display:flex;flex-direction:column;gap:12px}
+#ground-wrap.ipl>.card{flex:1}
+footer{margin-top:20px;font-size:13px;color:var(--mute)}
+footer a{color:inherit}
+.grid{grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))}
+@media (max-width:600px){.strip{gap:1px}.sc{min-width:1px}}
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title">Virat Kohli's international centuries</h1>
+  <p class="sub" id="subtitle">Filter by opponent, venue, result, innings or year.</p>
+
+  <div class="tabs" role="group" aria-label="Data set">
+    <button class="tab" id="tab-intl" data-src="intl" aria-pressed="true">International</button>
+    <button class="tab" id="tab-ipl" data-src="ipl" aria-pressed="false">IPL</button>
+  </div>
+
+  <div class="filters">
+    <select id="format" aria-label="Format"></select>
+    <select id="opponent" aria-label="Opponent"></select>
+    <select id="ground" aria-label="Venue type"></select>
+    <select id="result" aria-label="Result"></select>
+    <select id="innings" aria-label="Innings"></select>
+    <select id="year" aria-label="Year"></select>
+    <button id="clear">Clear filters</button>
+  </div>
+
+  <div class="cards" id="cards"></div>
+  <p class="insight" id="insight"></p>
+
+  <div class="card" style="margin-bottom:12px">
+    <h2>Every century, in order</h2>
+    <div class="strip" id="strip" role="img" aria-label="Bar chart of every century, height is runs scored"></div>
+    <div class="legend">
+      <span><i class="w"></i><span class="tm">India</span> won</span><span><i class="l"></i><span class="tm">India</span> lost</span><span><i class="d"></i>Drawn or tied</span>
+      <span>Bar height is runs scored. Hover a bar for details.</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h2>Centuries per year</h2><div class="years" id="years"></div></div>
+    <div class="card"><h2>Centuries per opponent</h2><ul id="opps"></ul></div>
+    <div class="card" id="pos-card"><h2>By batting position</h2><ul id="pos"></ul></div>
+    <div class="card" id="format-card"><h2>By format</h2><ul id="format-list"></ul><p class="empty" style="margin:8px 0 0">Test win rate counts drawn matches as not won.</p></div>
+    <div id="ground-wrap">
+    <div class="card"><h2 id="ground-h">India win rate by venue type</h2><ul id="ground-list"></ul></div>
+    <div class="card" id="rank-card"><h2>Best batting ranking</h2>
+      <div class="tiles">
+        <div class="tile"><small>Test</small><b>#1</b></div>
+        <div class="tile"><small>ODI</small><b>#1</b></div>
+        <div class="tile"><small>T20I</small><b>#1</b></div>
+      </div>
+      <p class="tnote">ICC best rank</p>
+    </div>
+    <div class="card" id="ipl-card" style="display:none"><h2>Best of IPL</h2>
+      <div class="tiles">
+        <div class="tile"><small>Orange<br>Cap</small><b>2x</b></div>
+        <div class="tile"><small>2016<br>Runs</small><b>973</b></div>
+        <div class="tile"><small>Current<br>Rank</small><b>#1</b></div>
+      </div>
+      <p class="tnote">For rcb</p>
+    </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>All centuries</h2>
+    <div class="scroll">
+      <table>
+        <thead id="thead"></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+  <footer>A star next to runs means not out.</footer>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const F = ['format', 'opponent', 'ground', 'result', 'innings', 'year'];
+const ALL = { format: 'All formats', opponent: 'All opponents', ground: 'All venue types', result: 'All results', innings: 'All innings', year: 'All years' };
+const cls = r => r === 'Won' ? 'w' : r === 'Lost' ? 'l' : 'd';
+const date = s => new Date(s + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+let source = 'intl';
+const isIpl = () => source === 'ipl';
+const runs = r => r.runs + (r.not_out ? '*' : '');
+
+function qs() {
+  const p = new URLSearchParams();
+  if (isIpl()) p.set('source', 'ipl');
+  F.forEach(f => { if ($(f).value && !(isIpl() && f === 'format')) p.set(f, $(f).value); });
+  const s = p.toString();
+  return s ? '?' + s : '';
+}
+const get = path => fetch('/api/' + path + qs()).then(r => r.json());
+
+function renderOpponents(list) {
+  const m = {};
+  list.forEach(r => {
+    const o = m[r.against] ||= { n: 0, w: 0, l: 0, d: 0, Test: 0, ODI: 0, T20I: 0 };
+    o.n++; o[cls(r.result)]++; if (r.format) o[r.format]++;
+  });
+  const rows = Object.entries(m).sort((a, b) => b[1].n - a[1].n || a[0].localeCompare(b[0]));
+  const max = rows.length ? rows[0][1].n : 1;
+  $('opps').innerHTML = rows.map(([name, o]) => `
+    <li class="row"><span>${name}<small class="sub">${['Test', 'ODI', 'T20I'].filter(k => o[k]).map(k => o[k] + ' ' + k).join(', ')}</small></span>
+      <span><span class="track" style="width:${o.n / max * 100}%">
+        <i class="w" style="flex:${o.w}"></i><i class="l" style="flex:${o.l}"></i><i class="d" style="flex:${o.d}"></i>
+      </span></span><span class="num">${o.n}</span></li>`).join('') || '<li class="empty">No centuries for these filters.</li>';
+}
+
+async function load() {
+  F.forEach(f => $(f).classList.toggle('on', !!$(f).value));
+  const ipl = isIpl(), team = ipl ? 'RCB' : 'India';
+  document.title = ipl ? 'Kohli IPL Centuries Explorer' : 'Kohli Centuries Explorer';
+  $('title').textContent = ipl ? "Virat Kohli's IPL centuries" : "Virat Kohli's international centuries";
+  $('subtitle').textContent = ipl ? 'Filter by opponent, venue, result, innings or year. All IPL centuries are for RCB.' : 'Filter by opponent, venue, result, innings or year.';
+  $('format').style.display = ipl ? 'none' : '';
+  $('pos-card').style.display = $('format-card').style.display = ipl ? 'none' : '';
+  $('rank-card').style.display = ipl ? 'none' : '';
+  $('ipl-card').style.display = ipl ? '' : 'none';
+  $('ground-wrap').classList.toggle('ipl', ipl);
+  $('opps').classList.toggle('compact', !ipl);
+  document.querySelectorAll('.tm').forEach(e => e.textContent = team);
+  $('ground-h').textContent = team + ' win rate by venue type';
+  $('thead').innerHTML = '<tr><th>No.</th><th>Runs</th>' + (ipl ? '<th>Balls</th>' : '') + '<th>Against</th>' + (ipl ? '' : '<th>Format</th>') + '<th>Venue</th><th>Date</th><th>Result</th></tr>';
+
+  const [s, byYear, byPos, byGround, byFormat, list] = await Promise.all(
+    ['stats', 'by-year', 'by-position', 'by-ground', 'by-format', 'centuries'].map(get));
+
+  const top = list.length ? list.reduce((a, b) => b.runs > a.runs ? b : a) : null;
+  const stat = (v, l) => `<div class="card stat"><b>${v}</b><small>${l}</small></div>`;
+  $('cards').innerHTML =
+    stat(s.total, 'Centuries') +
+    stat(s.total_runs.toLocaleString('en-IN'), 'Total runs') +
+    stat(top ? runs(top) : '-', 'Highest score') +
+    (ipl ? stat(s.strike_rate, 'Strike rate') : stat(s.scores_150_plus, '150+ scores')) +
+    stat(s.not_outs, 'Not outs') +
+    stat(s.total ? s.win_pct + '%' : '-', team + ' win rate');
+
+  $('insight').textContent = s.total
+    ? `${team} won ${s.win_pct}% of the ${s.total} matches in which Kohli scored a century in this selection.`
+    : 'No centuries match these filters.';
+
+  const ordered = [...list].reverse();
+  const colW = $('strip').clientWidth / Math.max(ordered.length, 1);
+  const need = Math.max(3, Math.ceil(40 / colW));   // bars a label needs before the next one
+  let since = need;
+  $('strip').innerHTML = ordered.map((r, i) => {
+    const first = i === 0 || ordered[i - 1].year !== r.year;
+    since++;
+    const show = first && since >= need;
+    if (show) since = 0;
+    const label = show ? '&rsquo;' + String(r.year).slice(2) : '';
+    return `<div class="sc"><button class="bar ${cls(r.result)}" style="--k:${r.runs / (ipl ? 130 : 260)}" tabindex="-1"
+      title="${runs(r)} against ${r.against} (${r.format}), ${r.stadium}, ${date(r.match_date)} (${r.result})"></button><span class="sy ${first ? 't' : ''}">${label}</span></div>`;
+  }).join('');
+
+  const ymax = Math.max(1, ...byYear.map(r => r.total));
+  $('years').innerHTML = byYear.map(r => `
+    <div class="ycol" title="${r.year}: ${r.total}"><span class="yv">${r.total}</span>
+    <div class="yb"><i style="height:${r.total / ymax * 100}%"></i></div>
+    <span class="yl">${String(r.year).slice(2)}</span></div>`).join('');
+
+  renderOpponents(list);
+
+  const pmax = Math.max(1, ...byPos.map(r => r.total));
+  $('pos').innerHTML = byPos.map(r => `
+    <li class="row"><span>No. ${r.batting_position}</span>
+    <span><span class="track" style="width:${r.total / pmax * 100}%"><i class="w" style="flex:1"></i></span></span>
+    <span class="num">${r.total}</span></li>`).join('');
+
+  $('format-list').innerHTML = byFormat.map(r => `
+    <li class="row" style="grid-template-columns:96px 1fr 44px"><span>${r.format} (${r.total})</span>
+    <span class="track full"><i class="w" style="width:${r.win_pct}%"></i></span>
+    <span class="num">${Math.round(r.win_pct)}%</span></li>`).join('');
+
+  $('ground-list').innerHTML = byGround.map(r => `
+    <li class="row" style="grid-template-columns:96px 1fr 44px"><span>${r.ground} (${r.total})</span>
+    <span class="track full"><i class="w" style="width:${r.win_pct}%"></i></span>
+    <span class="num">${Math.round(r.win_pct)}%</span></li>`).join('');
+
+  $('rows').innerHTML = list.map(r => `
+    <tr><td>${r.century_no}</td><td><b>${runs(r)}</b></td>${ipl ? `<td>${r.balls}</td>` : ''}<td>${r.against}</td>${ipl ? '' : `<td>${r.format}</td>`}
+    <td>${r.stadium}, ${r.city}</td><td>${date(r.match_date)}</td>
+    <td><span class="dot ${cls(r.result)}"></span>${r.result}</td></tr>`).join('');
+}
+
+async function loadOptions() {
+  const o = await (await fetch('/api/filters' + (isIpl() ? '?source=ipl' : ''))).json();
+  const opts = { format: o.formats, opponent: o.opponents, ground: o.grounds, result: o.results, innings: o.innings, year: o.years };
+  F.forEach(f => {
+    $(f).innerHTML = `<option value="">${ALL[f]}</option>` + opts[f].map(v => `<option value="${v}">${f === 'innings' ? 'Innings ' + v : v}</option>`).join('');
+  });
+}
+
+async function init() {
+  F.forEach(f => $(f).addEventListener('change', load));
+  $('clear').addEventListener('click', () => { F.forEach(f => { $(f).value = ''; }); load(); });
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', async () => {
+    if (b.dataset.src === source) return;
+    source = b.dataset.src;
+    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-pressed', String(t === b)));
+    await loadOptions();   // fresh dropdowns, so old filters never carry over
+    load();
+  }));
+  await loadOptions();
+  load();
+}
+init();
+</script>
+</body>
+</html>
