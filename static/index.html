@@ -63,6 +63,10 @@ td{padding:8px 12px 8px 0;border-bottom:1px solid var(--line);white-space:nowrap
 #ground-wrap{display:contents}
 #ground-wrap.ipl{display:flex;flex-direction:column;gap:12px}
 #ground-wrap.ipl>.card{flex:1}
+.top{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start}
+.top-left{min-width:0}
+.hero-photo{width:170px;height:170px;object-fit:cover;object-position:center 55%;border-radius:16px;border:1px solid var(--line);background:var(--card);display:block}
+@media (max-width:700px){.top{grid-template-columns:1fr}.hero-photo{order:-1;width:72px;height:72px;border-radius:50%}}
 footer{margin-top:20px;font-size:13px;color:var(--mute)}
 footer a{color:inherit}
 .grid{grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))}
@@ -71,22 +75,27 @@ footer a{color:inherit}
 </head>
 <body>
 <main>
-  <h1 id="title">Virat Kohli's international centuries</h1>
-  <p class="sub" id="subtitle">Filter by opponent, venue, result, innings or year.</p>
+  <div class="top">
+    <div class="top-left">
+    <h1 id="title">Virat Kohli's international centuries</h1>
+    <p class="sub" id="subtitle">Filter by opponent, venue, result, innings or year.</p>
 
-  <div class="tabs" role="group" aria-label="Data set">
-    <button class="tab" id="tab-intl" data-src="intl" aria-pressed="true">International</button>
-    <button class="tab" id="tab-ipl" data-src="ipl" aria-pressed="false">IPL</button>
-  </div>
+    <div class="tabs" role="group" aria-label="Data set">
+      <button class="tab" id="tab-intl" data-src="intl" aria-pressed="true">International</button>
+      <button class="tab" id="tab-ipl" data-src="ipl" aria-pressed="false">IPL</button>
+    </div>
 
-  <div class="filters">
-    <select id="format" aria-label="Format"></select>
-    <select id="opponent" aria-label="Opponent"></select>
-    <select id="ground" aria-label="Venue type"></select>
-    <select id="result" aria-label="Result"></select>
-    <select id="innings" aria-label="Innings"></select>
-    <select id="year" aria-label="Year"></select>
-    <button id="clear">Clear filters</button>
+    <div class="filters">
+      <select id="format" aria-label="Format"></select>
+      <select id="opponent" aria-label="Opponent"></select>
+      <select id="ground" aria-label="Venue type"></select>
+      <select id="result" aria-label="Result"></select>
+      <select id="innings" aria-label="Innings"></select>
+      <select id="year" aria-label="Year"></select>
+      <button id="clear">Clear filters</button>
+    </div>
+    </div>
+    <img class="hero-photo" src="/kohli.jpg" alt="Virat Kohli" onerror="this.style.display='none'">
   </div>
 
   <div class="cards" id="cards"></div>

@@ -146,6 +146,12 @@ def index():
     return FileResponse(BASE / "static" / "index.html")
 
 
+@app.get("/kohli.jpg")
+def kohli_photo():
+    """Header photo shown at the top right of the dashboard."""
+    return FileResponse(BASE / "static" / "kohli.jpg", media_type="image/jpeg")
+
+
 @app.get("/api/by-format")
 def by_format(f=Depends(filters)):
     """Test / ODI / T20I with win percentage."""
