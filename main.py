@@ -11,6 +11,15 @@ DB = BASE / "kohli.db"
 
 app = FastAPI(title="Kohli Centuries Explorer")
 
+
+@app.middleware("http")
+async def add_cache_headers(request, call_next):
+    """Let the browser and Vercel's CDN cache the (read-only) data and the photo."""
+    response = await call_next(request)
+    if request.url.path.startswith("/api/") or request.url.path == "/kohli.jpg":
+        response.headers["Cache-Control"] = "public, max-age=300, s-maxage=86400"
+    return response
+
 WIN_PCT = "ROUND(AVG(CASE WHEN result = 'Won' THEN 1.0 ELSE 0 END) * 100, 1)"
 
 
